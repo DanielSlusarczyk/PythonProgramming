@@ -5,7 +5,7 @@ import plotly.express as px
 import datetime
 
 class EvaluateTCNModel():
-    def __init__(self, X_test, y_test, y_test_metadata, county_names, random_state=None):
+    def __init__(self, X_test, y_test, y_test_metadata, county_names, features, random_state=None):
         """
         y_test_metadata: DataFrame with columns:
             'county', 'is_consumption', 'is_business', 'datetime', 'datetime_date'
@@ -15,6 +15,7 @@ class EvaluateTCNModel():
         self.metadata = y_test_metadata.reset_index(drop=True)
         self.county_names = county_names
         self.random_state = random_state
+        self.features = features
 
     def test(self, model, random_day=None, normalization=None):
         self.results = pd.DataFrame()
@@ -34,6 +35,7 @@ class EvaluateTCNModel():
         display(self.resultsPerCounty)
 
         self.__Plot(random_day)
+        self.__FeatureImportance(model)
 
     def __metricsPerCounty(self):
         validationData = self.metadata.copy()
@@ -107,4 +109,33 @@ class EvaluateTCNModel():
             .replace('is_consumption=False', 'Produkcja')
             .replace('=1.0', '(Tak)')
             .replace('=-1.0', '(Nie)')))
+        fig.show()
+
+    def __FeatureImportance(self, model):
+        baseline_mae = model.evaluate(self.X_test, self.y_test, verbose=0)[0]
+        importances = {}
+
+        for i, feature in enumerate(self.features):
+            X_test_permuted = self.X_test.copy()
+
+            for t in range(self.X_test.shape[1]):
+                X_test_permuted[:, t, i] = np.random.permutation(self.X_test[:, t, i])
+
+            permuted_mae = model.evaluate(X_test_permuted, self.y_test, verbose=0)[0]
+            importances[feature] = permuted_mae - baseline_mae
+
+        keys = list(importances.keys())
+        values = list(importances.values())
+
+        data = pd.DataFrame({'Attribute': keys, 'Weight': values}).sort_values(by='Weight', ascending=False).head(15)
+
+        fig = px.bar(
+            data,
+            x='Attribute',
+            y='Weight',
+            height=250,
+            width=1000,
+            title='Feature importance (PFI)'
+        )
+
         fig.show()
