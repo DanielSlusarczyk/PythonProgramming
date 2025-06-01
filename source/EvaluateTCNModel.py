@@ -86,29 +86,29 @@ class EvaluateTCNModel():
         plot_data = plot_data.groupby(by=['datetime', 'is_consumption', 'is_business']).mean().reset_index()
 
         fig = px.line(
-            plot_data.rename(columns={'target': 'Cel', 'predictions': 'Predykcja'}),
+            plot_data.rename(columns={'target': 'Real', 'predictions': 'Prediction'}),
             x='datetime',
-            y=['Cel', 'Predykcja'],
+            y=['Real', 'Prediction'],
             facet_col='is_consumption',
             facet_row='is_business',
-            title='Test działania modelu TCN',
+            title='TCN model test',
             labels={
-                'is_business': 'Biznes',
-                'datetime': 'Data',
-                'value': 'Wartość'
+                'is_business': 'Business',
+                'datetime': 'Date',
+                'value': 'Value'
             },
             height=700, width=1000
         )
 
-        fig.update_traces(patch={"line": {"dash": "dot"}}, selector=self.selector('Predykcja'))
-        fig.update_layout(legend_title_text='Zmienne')
+        fig.update_traces(patch={"line": {"dash": "dot"}}, selector=self.selector('Prediction'))
+        fig.update_layout(legend_title_text='Variables')
         fig.update_xaxes(tickformat="%d-%m-%Y")
         fig.for_each_annotation(lambda a: a.update(
             text=a.text
-            .replace('is_consumption=True', 'Konsumpcja')
-            .replace('is_consumption=False', 'Produkcja')
-            .replace('=1.0', '(Tak)')
-            .replace('=-1.0', '(Nie)')))
+            .replace('is_consumption=True', 'Consumption')
+            .replace('is_consumption=False', 'Prediction')
+            .replace('=True', '(Yes)')
+            .replace('=False', '(No)')))
         fig.show()
 
     def __FeatureImportance(self, model):

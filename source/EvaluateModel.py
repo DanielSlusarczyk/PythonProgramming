@@ -83,27 +83,27 @@ class EvaluteModel():
         display(validationData)
 
         fig = px.line(
-                    validationData.rename(columns={'target': 'Cel', 'predictions': 'Predykcja'}),
+                    validationData.rename(columns={'target': 'Real', 'predictions': 'Prediction'}),
                     x='datetime',
-                    y=['Cel', 'Predykcja'], 
+                    y=['Real', 'Prediction'], 
                     facet_col='is_consumption', 
                     facet_row='is_business', 
-                    title=f'Test działania modelu',
+                    title=f'XGBoost model test',
                     labels={
-                          'is_business' : 'Biznes',
-                          'datetime' : 'Data',
-                          'value': 'Wartość'}, height=700, width=1000)
+                          'is_business' : 'Business',
+                          'datetime' : 'Date',
+                          'value': 'Value'}, height=700, width=1000)
         
         # Add custom plot style
-        fig.update_traces(patch={"line": {"dash": "dot"}}, selector=self.selector('Predykcja'))
-        fig.update_layout(legend_title_text='Zmienne')
+        fig.update_traces(patch={"line": {"dash": "dot"}}, selector=self.selector('Prediction'))
+        fig.update_layout(legend_title_text='Variables')
         fig.update_xaxes(tickformat="%d-%m-%Y")
         fig.for_each_annotation(lambda a: a.update(
             text=a.text
-            .replace('is_consumption=True', 'Konsumpcja')
-            .replace('is_consumption=False', 'Produkcja')
-            .replace('=True', '(Tak)')
-            .replace('=False', '(Nie)')))
+            .replace('is_consumption=True', 'Consumption')
+            .replace('is_consumption=False', 'Production')
+            .replace('=True', '(Yes)')
+            .replace('=False', '(No)')))
         fig.show()
 
 
@@ -113,13 +113,13 @@ class EvaluteModel():
         keys = list(feature_importance.keys())
         values = list(feature_importance.values())
 
-        data = pd.DataFrame({'Atrybut' : keys, 'Waga' : values}).sort_values(by = 'Waga', ascending=False)[0:15]
+        data = pd.DataFrame({'Attribute' : keys, 'Weight' : values}).sort_values(by = 'Weight', ascending=False)[0:15]
 
         fig = px.bar(
             data,
-            x='Atrybut',
-            y='Waga',
+            x='Attribute',
+            y='Weight',
             height=250,
             width=1000,
-            title='Waga atrybutów')
+            title='Attribute weight')
         fig.show()
